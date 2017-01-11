@@ -17,18 +17,18 @@ io.on('connection', function(socket) {
 		io.emit('chat message', msg, name, online)
 	});
 
-	// TODO: get this to work only when a user is typing
 	socket.on('typing', function(name) {
 		io.emit('typing', name);
 	});
 
 	socket.on('disconnect', function() {
+		// TODO: find out how to get the username
+		// 		 of the user who disconnected
 	    console.log('a user disconnected')
 	});
 
 	socket.on('login', function(uname) {
 		users[uname] = uname
-		console.log(users)
 		io.emit('login', 'msg.html?uname=' + uname)
 		io.emit('loggedin', users)
 	});
