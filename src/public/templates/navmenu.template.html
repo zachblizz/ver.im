@@ -1,0 +1,31 @@
+<div ng-controller='NavCtrl'>
+	<md-toolbar class='md-warn'>
+		<div class='md-toolbar-tools'>
+			<md-button ng-click="openMenu()">
+				<span class='glyphicon glyphicon-menu-hamburger'></span>
+			</md-button>
+			<h2 class='md-flex'>Angular Material Test</h2>
+		</div>
+	</md-toolbar>
+	<div>
+		<md-sidenav md-component-id='menu' class='md-sidenav-left'>
+			<md-content flex layout-padding layout-wrap>
+				<md-toolbar class='md-tall md-hue-2'>
+					<span flex></span>
+					<div layout='column' class='md-toolbar-tools-bottom inset'>
+						<span></span>
+						<div>Welcome, Zach Blizzard</div>
+						<div>zach.blizzard@one.verizon.com</div>
+					</div>
+				</md-toolbar>
+			</md-content>
+			<md-content>
+				<ul>
+					<li><a href='home'>Home</a></li>
+					<li><a href='about'>About</a></li>
+					<li><a href='something'>something</a></li>
+				</ul>
+			</md-content>
+		</md-sidenav>
+	</div>
+</div>
