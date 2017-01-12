@@ -1,9 +1,16 @@
-var users = {}
-
 $(function() {
 	var socket = io();
 	var uname = getParameterByName('uname');
-	// displayUsrsOnline();
+	var cmds;
+	var users = {};
+
+	$.get('/cmds', function(data, status) {
+		if (status === 'success') {
+			cmds = data;
+		} else {
+			console.log('there was an issue with getting the cmds', status);
+		}
+	});
 
 	$('h2').html('Hello, ' + uname + '! Welcome to ver.im');
 
@@ -13,98 +20,74 @@ $(function() {
 	});
 
 	$('#msg-board').submit(function() {
-		if ("" !== $('#usr-msg').val().trim() && "/cmds" !== $('#usr-msg').val().trim()
-			&& $('#usr-msg').val().trim().indexOf('<script>') < 0) {
-			var msg = removeTags($('#usr-msg').val().trim());
+		var trimmed = $('#usr-msg').val().trim()
 
-			if ("" !== msg) {
+		if ("" !== trimmed && "/cmds" !== trimmed
+			&& trimmed.indexOf('<script>') < 0 && '/clear' !== trimmed 
+			&& trimmed.indexOf('/add') !== 0) {
+
+			var msg = removeTags($('#usr-msg').val().trim());
+			if ("" !== msg ) {
 				socket.emit('chat message', msg, uname);
 			} else {
 				$('#msgs').append($('<li>').html('<img src="pics/invalid.png" />')); 
 			}
-			$('#usr-msg').val('');
-		} else if ("/cmds" === $('#usr-msg').val().trim()) {
-			showCommands();
-		} else if ("/clear" === $('#usr-msg').val().trim()) {
+		} else if ("/cmds" === trimmed) {
+			showCommands(cmds);
+		} else if (trimmed.indexOf('/add') === 0) {
+			addCommand(trimmed);
+		}  else if ("/clear" === trimmed) {
 			$('#msgs').html('');
-			$('#usr-msg').val('');
 		}
-
+		$('#usr-msg').val('');
 		return false;
 	});
 
-	socket.on('chat message', function(msg, name, online) {
-		displayUsrsOnline(online)
-		
+	socket.on('chat message', function(m, name, online) {
+		displayUsrsOnline(online, users)
+
 		if (!$('#usr-msg').is(':focus')) {
 			alert(name + " said something!!");
 		}
 
 		$('#' + name + '-typing').css('display', 'none');
 
-		var msgStart = '<span style="font-size: 9px;">' + getMsgTime() + '</span> <b>' + name + ':</b>';
+		var msgStart = '<span style="font-size: 9px;">' + getMsgTime() + '</span> <b>' + name + ':</b> ';
+		var msg = m;
 
-		switch(msg) {
-			case "/happy": 
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/awesome4.png" />')); 
-				break;
-			case "/sad": 
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/awesome2.png" />')); 
-				break;
-			case "/rly":
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/awesome5.png" />')); 
-				break;
-			case "/doubt": 
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/awesome.png" />')); 
-				break;
-			case "/hmm": 
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/hmm.gif" />'));
-				break;
-			case "/eat": 
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/happyPoo.gif" />')); 
-				break;
-			case "/sam": 
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/sam.jpg" style="height: 100px;" />')); 
-				break;
-			case "/magic": 
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/MAGIC.gif" />')); 
-				break;
-			case "/peaceout": 
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/minion_bye.gif" />')); 
-				break;
-			case "/getfat": 
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/fat_man.gif" />')); 
-				break;
-			case "/sleepy": 
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/sleepyAsian.gif" />')); 
-				break;
-			case "/b": 
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/thumbsUp-1.gif" />')); 
-				break;
-			case "/crybabby": 
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/cry.gif" />')); 
-				break;
-			case "/rage": 
-				$('#msgs').append($('<li>').html(msgStart + ' <img src="pics/keyboardRage.gif" />')); 
-				break;
-			default: 
-				$('#msgs').append($('<li>').html(msgStart + ' ' + msg));
+		if (cmds[msg]) {
+			msg = cmds[msg]
 		}
+
+		$('#msgs').append($('<li>').html(msgStart + msg));
 	});
 
 	socket.on('typing', function(name) {
-		console.log(name + ' is typing...');
 		$('#' + name + '-typing').css('display', 'inline-block');
 	});
-
-	socket.on('loggedin', function(usrs) {
-		displayUsrsOnline();
-	});
-
-	$('#msgs').animate({scrollTop: document.body.scrollHeight},"fast");
 });
 
-function displayUsrsOnline(online) {
+function addCommand(cmd, cmds) {
+	var scriptSplit = cmd.split('<');
+	var cmd = scriptSplit[0].split(' ')[1];
+	var outcome = '<' + scriptSplit[1]
+
+	$.get('/addCmd?cmd=' + cmd + '&outcome=' + outcome, function(data, status) {
+		if (status === 'success') {
+			alert(data.msg)
+		}
+	});
+
+	$.get('/cmds', function(data, status) {
+		if (status === 'success') {
+			cmds = data;
+		} else {
+			console.log('there was an issue with getting the cmds', status);
+		}
+	})
+}
+
+function displayUsrsOnline(online, users) {
 	$('#usrs').html('<h3>Users Online</h3>');
 	online.forEach(function(name) {
 		if (!users[name]) {
@@ -117,19 +100,10 @@ function displayUsrsOnline(online) {
 	}
 }
 
-function showCommands() {
-	$('#msgs').append($('<li>').html('<b>/happy:</b> <img src="pics/awesome4.png" />')); 
-	$('#msgs').append($('<li>').html('<b>/sad:</b> <img src="pics/awesome2.png" />')); 
-	$('#msgs').append($('<li>').html('<b>/rly:</b> <img src="pics/awesome5.png" />')); 
-	$('#msgs').append($('<li>').html('<b>/doubt:</b> <img src="pics/awesome.png" />')); 
-	$('#msgs').append($('<li>').html('<b>/hmm:</b> <img src="pics/hmm.gif" />'));
-	$('#msgs').append($('<li>').html('<b>/eat:</b> <img src="pics/happyPoo.gif" />')); 
-	$('#msgs').append($('<li>').html('<b>/sam:</b> <img src="pics/sam.jpg" style="height: 100px;" />')); 
-	$('#msgs').append($('<li>').html('<b>/magic:</b> <img src="pics/MAGIC.gif" />')); 
-	$('#msgs').append($('<li>').html('<b>/peaceout:</b> <img src="pics/minion_bye.gif" />')); 
-	$('#msgs').append($('<li>').html('<b>/sleepy:</b> <img src="pics/sleepyAsian.gif" />')); 
-	$('#msgs').append($('<li>').html('<b>/b:</b> <img src="pics/thumbsUp-1.gif" />')); 
-	$('#msgs').append($('<li>').html('<b>/crybabby:</b> <img src="pics/cry.gif" />'));
+function showCommands(cmds) {
+	for (var cmd in cmds) {
+		$('#msgs').append($('<li>').html('<b>' + cmd + ':</b> ' + cmds[cmd])); 
+	}
 	$('#usr-msg').val('');
 }
 

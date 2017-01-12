@@ -1,0 +1,20 @@
+{
+  "/happy": " <img src='pics/awesome4.png' />",
+  "/sad": " <img src='pics/awesome2.png' />",
+  "/rly": " <img src='pics/awesome5.png' />",
+  "/doubt": " <img src='pics/awesome.png' />",
+  "/hmm": " <img src='pics/hmm.gif' />",
+  "/eat": " <img src='pics/happyPoo.gif' />",
+  "/sam": " <img src='pics/sam.jpg' style='height: 100px;' />",
+  "/magic": " <img src='pics/MAGIC.gif' />",
+  "/peaceout": " <img src='pics/minion_bye.gif' />",
+  "/getfat": " <img src='pics/fat_man.gif' />",
+  "/sleepy": " <img src='pics/sleepyAsian.gif' />",
+  "/b": " <img src='pics/thumbsUp-1.gif' />",
+  "/crybabby": " <img src='pics/cry.gif' />",
+  "/rage": " <img src='pics/keyboardRage.gif' />",
+  "/clear": " Clears the message board",
+  "/helloworld": "<img src='http://2017.animationdingle.com/wp-content/uploads/2016/08/hello_world.gif' />",
+  "/LOL": "<img src='http://m.memegen.com/florau.jpg'/>",
+  "/yaoLOL": "<img src='http://m.memegen.com/florau.jpg'/>"
+}
