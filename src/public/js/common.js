@@ -60,6 +60,7 @@ $(function() {
 		}
 
 		$('#msgs').append($('<li>').html(msgStart + msg));
+		$('#msgs').scrollTop($('#msgs').height());
 	});
 
 	socket.on('typing', function(name) {

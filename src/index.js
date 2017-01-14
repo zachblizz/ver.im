@@ -11,7 +11,7 @@ app.use(bodyparser.json());
 
 var users = {};
 var online = [];
-var cmdFilePath = 'C:/Users/v638666/nodeFun/ver.im/src/public/cmds/cmds.json'
+var cmdFilePath = '/Users/jimmyfargo/Dev/nodeStuff/ver.im/src/public/cmds/cmds.json'
 var cmds = loadCmds();
 
 // loads the commands and parses the json obj
