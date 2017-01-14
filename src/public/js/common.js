@@ -14,7 +14,6 @@ $(function() {
 
 	$('h2').html('Hello, ' + uname + '! Welcome to ver.im');
 
-	// TODO: only have to emit this once...
 	$('#usr-msg').on('input', function() {
 		socket.emit('typing', uname);
 	});
@@ -25,8 +24,8 @@ $(function() {
 		if ("" !== trimmed && "/cmds" !== trimmed
 			&& trimmed.indexOf('<script>') < 0 && '/clear' !== trimmed 
 			&& trimmed.indexOf('/add') !== 0) {
-
 			var msg = removeTags($('#usr-msg').val().trim());
+			
 			if ("" !== msg ) {
 				socket.emit('chat message', msg, uname);
 			} else {
@@ -51,8 +50,8 @@ $(function() {
 		}
 
 		$('#' + name + '-typing').css('display', 'none');
-
-		var msgStart = '<span style="font-size: 9px;">' + getMsgTime() + '</span> <b>' + name + ':</b> ';
+		var msgStart = '<span style="font-size: 9px;">' + 
+			getMsgTime() + '</span> <b>' + name + ':</b> ';
 		var msg = m;
 
 		if (cmds[msg]) {
@@ -97,7 +96,8 @@ function displayUsrsOnline(online, users) {
 	})
 
 	for (name in users) {
-		$('#usrs').append($('<li>').html(name + '<span id="' + name + '-typing" style="display: none; font-size: 9px;">&nbsp;&nbsp;typing...</span>'));
+		$('#usrs').append($('<li>').html(name + '<span id="' + name + 
+			'-typing" style="display: none; font-size: 9px;">&nbsp;&nbsp;typing...</span>'));
 	}
 }
 
