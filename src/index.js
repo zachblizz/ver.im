@@ -1,76 +1,47 @@
-var express = require('express'),
-	app = express(),
-	path = require('path'),
-	http = require('http').Server(app),
-	io = require('socket.io')(http),
-	bodyparser = require('body-parser'),
-	fs = require('fs');
+const express = require('express')
+const app = express()
+const cors = require('cors')
+const	http = require('http').Server(app)
+const	io = require('socket.io')(http)
+const	bodyparser = require('body-parser')
+const commands = require('./commands')
+const { onLogin, onAddCmd, onGetCmds, onGetSocketCmds } = require('./routes')
+const {
+	onNewUser,
+	onUserDisconnect,
+	onUserTyping
+} = require('./extension')
+const { getOnlineUsers } = require('./utils')
 
-app.use(express.static(path.join(__dirname,'public')));
-app.use(bodyparser.json());
+let users = {}
 
-var users = {};
-var online = [];
-var cmdFilePath = '/Users/jimmyfargo/Dev/nodeStuff/ver.im/src/public/cmds/cmds.json'
-var cmds = loadCmds();
+// app.use(express.static(path.join(__dirname, 'public')))
+app.use(bodyparser.json())
+app.use(cors())
 
-// loads the commands and parses the json obj
-function loadCmds() {
-	return JSON.parse(fs.readFileSync(cmdFilePath));
-}
+app.put('/login', (req, res) => {
+  const username = req.body.username
+	const loggedInResp = onLogin(username, users)
+	if (!loggedInResp.userAdded) {
+		res.status(500).send(loggedInResp)
+	}
+	res.status(200).send(loggedInResp)
+})
+app.get('/addCmd', onAddCmd)
+app.get('/getCmds', onGetCmds)
+app.get('/socketCmds', onGetSocketCmds)
+app.get('/onlineUsers', (_, res) => res.status(200).send({ users: getOnlineUsers(users) }))
 
 io.on('connection', function(socket) {
-	console.log('a user connected');
-
-	socket.on('chat message', function(msg, name) {
-		online.push(name)
-		io.emit('chat message', msg, name, online)
-	});
-
-	socket.on('typing', function(name) {
-		io.emit('typing', name);
-	});
-
-	socket.on('disconnect', function() {
-		// TODO: find out how to get the username
-		// 		 of the user who disconnected
-	    console.log('a user disconnected')
-	});
-
-	socket.on('login', function(uname) {
-		users[uname] = uname
-		io.emit('login', 'msg.html?uname=' + uname)
-		io.emit('loggedin', users)
-	});
-});
-
-// saves the command
-app.get('/addCmd', function(req, res) {
-	var cmd = req.query.cmd;
-	var outcome = req.query.outcome;
-	var msg;
-
-	if (!cmds[cmd]) {
-		cmds[cmd] = outcome;
-		fs.writeFile(cmdFilePath, JSON.stringify(cmds, null, 2), function(err) {
-			if (err) {
-				console.log('there was an error writing to cmd file', e)
-				msg = 'there was an error while saving the command'
-			} else {
-				console.log('cmd saved successfully')
-				msg = 'the command ' + cmd + ' was added successfully'
-			}
-		});
-	} else {
-		msg = cmd + ' is already available. please type "/cmds" to view a list of all available commands'
-	}
-	res.json({ saved: msg })
-})
-
-app.get('/cmds', function(req, res) {
-	res.json(cmds)
+	let currentUser = {}
+	socket.on(commands.newUser, ({username}) => {
+		currentUser = onNewUser({socket, users, username})
+	})
+	socket.on(commands.receiveClientMsg, msg => socket.emit(commands.receiveServerMsg, msg))
+	socket.on(commands.typing, ({username}) => onUserTyping({socket, users, username}))
+	socket.on('disconnect', () => onUserDisconnect({socket, currentUser, users}))
 })
 
 http.listen(3000, function() {
-	console.log('listening on port 3090');
-});
+	console.log('listening on port 3000')
+})
