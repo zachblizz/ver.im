@@ -1,6 +1,8 @@
 const commands = require('./commands')
 const { getOnlineUsers } = require('./utils')
 const { getCmds } = require('./routes')
+const fs = require('fs')
+const path = require('path')
 
 function onNewUser({io, users, username} = {}) {
   const onlineUsers = getOnlineUsers(users)
@@ -24,17 +26,46 @@ function onUserDisconnect({io, currentUser, users} = {}) {
 }
 
 function onReceiveClientMsg({io, socket, msg}) {
-  if (msg.msg !== '/cmds') {
-    io.emit(commands.receiveServerMsg, msg)
-  } else {
-    const cmds = getCmds()
+  const cmds = getCmds()
 
-    socket.emit(commands.receiveServerMsg, {
-      ...msg,
-      username: 'svr',
-      msg: ['COMMANDS:', ...Object.keys(cmds)],
-      style: {color: '#aaa'}
-    })
+  if (msg.msg !== '/cmds' && (!cmds[msg.msg] || msg.msg === '/clear')) {
+    if (msg.msg !== '/clear') {
+      io.emit(commands.receiveServerMsg, msg)
+    } else {
+      socket.emit(commands.receiveServerMsg, msg)
+    }
+  } else {
+    if (msg.msg === '/cmds') {
+      socket.emit(commands.receiveServerMsg, {
+        ...msg,
+        username: 'svr',
+        msg: ['COMMANDS:', ...Object.keys(cmds)],
+        style: {color: '#aaa'}
+      })
+    } else if (cmds[msg.msg]) {
+      const mimeMsg = cmds[msg.msg]
+
+      if (mimeMsg.type === 'img') {
+        fs.readFile(path.join(__dirname, mimeMsg.src), (err, buffer) => {
+          if (err) {
+            io.emit(commands.receiveServerMsg, {
+              ...msg,
+              username: 'svr',
+              msg: "doh..."
+            })
+          }
+          io.emit(commands.receiveServerMsg, {...msg, image: true, buffer})
+        })
+      } else {
+        // need to send the cmd
+        io.emit(commands.receiveServerMsg, {
+          ...msg,
+          username: 'svr',
+          msg: mimeMsg.src,
+          type: mimeMsg.type
+        })
+      }
+    }
   }
 }
 

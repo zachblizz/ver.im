@@ -1,6 +1,6 @@
 const fs = require('fs')
 const	path = require('path')
-const cmdFilePath = path.join(__dirname, 'public', 'cmds', 'cmds.json')
+const cmdFilePath = path.join(__dirname, 'cmds', 'cmds.json')
 const commands = require('./commands')
 
 let cmds = loadCmds()

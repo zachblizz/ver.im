@@ -4,8 +4,9 @@ const cors = require('cors')
 const	http = require('http').Server(app)
 const	io = require('socket.io')(http)
 const	bodyparser = require('body-parser')
+const path = require('path')
 const commands = require('./commands')
-const { onLogin, onAddCmd, onGetCmds, onGetSocketCmds, getCmds } = require('./routes')
+const { onLogin, onAddCmd, onGetCmds, onGetSocketCmds } = require('./routes')
 const {
 	onNewUser,
 	onUserDisconnect,
@@ -17,6 +18,7 @@ const { getOnlineUsers } = require('./utils')
 let users = {}
 
 // app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, 'pics')))
 app.use(bodyparser.json())
 app.use(cors())
 
