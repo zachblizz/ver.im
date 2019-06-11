@@ -1,5 +1,6 @@
 const commands = require('./commands')
 const { getOnlineUsers } = require('./utils')
+const { getCmds } = require('./routes')
 
 function onNewUser({io, users, username} = {}) {
   const onlineUsers = getOnlineUsers(users)
@@ -22,8 +23,24 @@ function onUserDisconnect({io, currentUser, users} = {}) {
   }
 }
 
+function onReceiveClientMsg({io, socket, msg}) {
+  if (msg.msg !== '/cmds') {
+    io.emit(commands.receiveServerMsg, msg)
+  } else {
+    const cmds = getCmds()
+
+    socket.emit(commands.receiveServerMsg, {
+      ...msg,
+      username: 'svr',
+      msg: ['COMMANDS:', ...Object.keys(cmds)],
+      style: {color: '#aaa'}
+    })
+  }
+}
+
 module.exports = {
   onNewUser,
   onUserTyping,
-  onUserDisconnect
+  onUserDisconnect,
+  onReceiveClientMsg
 }

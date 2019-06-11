@@ -5,11 +5,12 @@ const	http = require('http').Server(app)
 const	io = require('socket.io')(http)
 const	bodyparser = require('body-parser')
 const commands = require('./commands')
-const { onLogin, onAddCmd, onGetCmds, onGetSocketCmds } = require('./routes')
+const { onLogin, onAddCmd, onGetCmds, onGetSocketCmds, getCmds } = require('./routes')
 const {
 	onNewUser,
 	onUserDisconnect,
-	onUserTyping
+	onUserTyping,
+	onReceiveClientMsg
 } = require('./extension')
 const { getOnlineUsers } = require('./utils')
 
@@ -37,7 +38,7 @@ io.on('connection', function (socket) {
 	socket.on(commands.newUser, ({username}) => {
 		currentUser = onNewUser({io, users, username})
 	})
-	socket.on(commands.receiveClientMsg, msg => io.emit(commands.receiveServerMsg, msg))
+	socket.on(commands.receiveClientMsg, msg => onReceiveClientMsg({io, socket, msg}))
 	socket.on(commands.typing, ({username}) => onUserTyping({io, users, username, cmd: commands.typing}))
 	socket.on(commands.doneTyping, ({username}) => onUserTyping({io, users, username, cmd: commands.doneTyping}))
 	socket.on('disconnect', () => onUserDisconnect({io, currentUser, users}))

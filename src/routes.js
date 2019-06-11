@@ -73,9 +73,14 @@ function onGetSocketCmds(_, res) {
   res.status(200).send({commands})
 }
 
+function getCmds() {
+  return cmds
+}
+
 module.exports = {
   onLogin,
   onAddCmd,
   onGetCmds,
-  onGetSocketCmds
+  onGetSocketCmds,
+  getCmds
 }
