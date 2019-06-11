@@ -32,14 +32,15 @@ app.get('/getCmds', onGetCmds)
 app.get('/socketCmds', onGetSocketCmds)
 app.get('/onlineUsers', (_, res) => res.status(200).send({ users: getOnlineUsers(users) }))
 
-io.on('connection', function(socket) {
+io.on('connection', function (socket) {
 	let currentUser = {}
 	socket.on(commands.newUser, ({username}) => {
-		currentUser = onNewUser({socket, users, username})
+		currentUser = onNewUser({io, users, username})
 	})
-	socket.on(commands.receiveClientMsg, msg => socket.emit(commands.receiveServerMsg, msg))
-	socket.on(commands.typing, ({username}) => onUserTyping({socket, users, username}))
-	socket.on('disconnect', () => onUserDisconnect({socket, currentUser, users}))
+	socket.on(commands.receiveClientMsg, msg => io.emit(commands.receiveServerMsg, msg))
+	socket.on(commands.typing, ({username}) => onUserTyping({io, users, username, cmd: commands.typing}))
+	socket.on(commands.doneTyping, ({username}) => onUserTyping({io, users, username, cmd: commands.doneTyping}))
+	socket.on('disconnect', () => onUserDisconnect({io, currentUser, users}))
 })
 
 http.listen(3000, function() {

@@ -1,5 +1,6 @@
 module.exports = {
   typing: 'client:typing',
+  doneTyping: 'client:done-typing',
   newUser: 'client:new-user',
   loggedIn: 'server:logged-in',
   loggedOut: 'server:logged-out',
