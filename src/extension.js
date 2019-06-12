@@ -1,6 +1,5 @@
-const commands = require('./commands')
+const { chatCmds } = require('./models')
 const { getOnlineUsers } = require('./utils')
-const { getCmds } = require('./routes')
 const fs = require('fs')
 const path = require('path')
 
@@ -26,9 +25,7 @@ function onUserDisconnect({io, currentUser, users} = {}) {
 }
 
 function onReceiveClientMsg({io, socket, msg}) {
-  const cmds = getCmds()
-
-  if (msg.msg !== '/cmds' && (!cmds[msg.msg] || msg.msg === '/clear')) {
+  if (msg.msg !== '/cmds' && (!chatCmds[msg.msg] || msg.msg === '/clear')) {
     if (msg.msg !== '/clear') {
       io.emit(commands.receiveServerMsg, msg)
     } else {
@@ -39,11 +36,11 @@ function onReceiveClientMsg({io, socket, msg}) {
       socket.emit(commands.receiveServerMsg, {
         ...msg,
         username: 'svr',
-        msg: ['COMMANDS:', ...Object.keys(cmds)],
+        msg: ['COMMANDS:', ...Object.keys(chatCmds)],
         style: {color: '#aaa'}
       })
-    } else if (cmds[msg.msg]) {
-      const mimeMsg = cmds[msg.msg]
+    } else if (chatCmds[msg.msg]) {
+      const mimeMsg = chatCmds[msg.msg]
 
       if (mimeMsg.type === 'img') {
         fs.readFile(path.join(__dirname, mimeMsg.src), (err, buffer) => {
