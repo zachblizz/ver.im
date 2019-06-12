@@ -24,6 +24,5 @@ function onAddCmd(req, res) {
 }
 
 module.exports = {
-  get: (_, res) => res.status(200).send(models.chatCmds),
   put: onAddCmd
 }

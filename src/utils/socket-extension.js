@@ -1,11 +1,11 @@
-const { chatCmds } = require('./models')
-const { getOnlineUsers } = require('./utils')
+const { chatCmds, socketCmds } = require('../models')
+const { getOnlineUsers } = require('../utils/utils')
 const fs = require('fs')
 const path = require('path')
 
 function onNewUser({io, users, username} = {}) {
   const onlineUsers = getOnlineUsers(users)
-  io.emit(commands.sendOnlineUsers, {onlineUsers})
+  io.emit(socketCmds.sendOnlineUsers, {onlineUsers})
   return users[username]
 }
 
@@ -16,24 +16,24 @@ function onUserTyping({io, users, username, cmd} = {}) {
 function onUserDisconnect({io, currentUser, users} = {}) {
   if (currentUser && currentUser.username) {
     console.log(`${currentUser.username} logged out`)
-    io.emit(commands.loggedOut, {msg: `${currentUser.username} logged out`})
+    io.emit(socketCmds.loggedOut, {msg: `${currentUser.username} logged out`})
     delete users[currentUser.username]
 
     const onlineUsers = getOnlineUsers(users)
-    io.emit(commands.sendOnlineUsers, {onlineUsers})
+    io.emit(socketCmds.sendOnlineUsers, {onlineUsers})
   }
 }
 
 function onReceiveClientMsg({io, socket, msg}) {
   if (msg.msg !== '/cmds' && (!chatCmds[msg.msg] || msg.msg === '/clear')) {
     if (msg.msg !== '/clear') {
-      io.emit(commands.receiveServerMsg, msg)
+      io.emit(socketCmds.receiveServerMsg, msg)
     } else {
-      socket.emit(commands.receiveServerMsg, msg)
+      socket.emit(socketCmds.receiveServerMsg, msg)
     }
   } else {
     if (msg.msg === '/cmds') {
-      socket.emit(commands.receiveServerMsg, {
+      socket.emit(socketCmds.receiveServerMsg, {
         ...msg,
         username: 'svr',
         msg: ['COMMANDS:', ...Object.keys(chatCmds)],
@@ -43,19 +43,19 @@ function onReceiveClientMsg({io, socket, msg}) {
       const mimeMsg = chatCmds[msg.msg]
 
       if (mimeMsg.type === 'img') {
-        fs.readFile(path.join(__dirname, mimeMsg.src), (err, buffer) => {
+        fs.readFile(path.join(__dirname, '..', mimeMsg.src), (err, buffer) => {
           if (err) {
-            io.emit(commands.receiveServerMsg, {
+            io.emit(socketCmds.receiveServerMsg, {
               ...msg,
               username: 'svr',
               msg: "doh..."
             })
           }
-          io.emit(commands.receiveServerMsg, {...msg, image: true, buffer})
+          io.emit(socketCmds.receiveServerMsg, {...msg, image: true, buffer})
         })
       } else {
         // need to send the cmd
-        io.emit(commands.receiveServerMsg, {
+        io.emit(socketCmds.receiveServerMsg, {
           ...msg,
           username: 'svr',
           msg: mimeMsg.src,

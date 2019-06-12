@@ -4,10 +4,9 @@ const {
 	onUserDisconnect,
 	onUserTyping,
 	onReceiveClientMsg
-} = require('../extension')
+} = require('../utils/socket-extension')
 
 function socketController(io) {
-  console.log('setting up socket ctrl')
   io.on('connection', function (socket) {
     let currentUser = {}
     socket.on(socketCmds.newUser, ({username}) => {

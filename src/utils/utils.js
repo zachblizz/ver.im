@@ -1,4 +1,4 @@
-const models = require('./models')
+const models = require('../models')
 
 function getOnlineUsers() {
   const userNames = Object.keys(models.users)

@@ -1,5 +1,5 @@
 const models = require('../models')
-const { getOnlineUsers } = require('../utils')
+const { getOnlineUsers } = require('../utils/utils')
 
 function onLogin(username) {
   let res = {}
