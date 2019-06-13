@@ -4,6 +4,13 @@ const fs = require('fs')
 const path = require('path')
 
 function onNewUser({io, users, username} = {}) {
+  if (!users[username]) { // user refreshed the browser
+    users[username] = {
+      username,
+      loginTime: new Date()
+    }
+  }
+
   const onlineUsers = getOnlineUsers(users)
   io.emit(socketCmds.sendOnlineUsers, {onlineUsers})
   return users[username]
@@ -14,6 +21,7 @@ function onUserTyping({io, users, username, cmd} = {}) {
 }
 
 function onUserDisconnect({io, currentUser, users} = {}) {
+  console.log('client disconnected')
   if (currentUser && currentUser.username) {
     console.log(`${currentUser.username} logged out`)
     io.emit(socketCmds.loggedOut, {msg: `${currentUser.username} logged out`})

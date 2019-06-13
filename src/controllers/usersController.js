@@ -16,7 +16,7 @@ function onLogin(username) {
     }
   } else {
     const user = {
-      username: username,
+      username,
       loginTime: new Date()
     }
 
@@ -36,8 +36,9 @@ const usersController = {
     const loggedInResp = onLogin(username)
     if (!loggedInResp.userAdded) {
       res.status(500).send(loggedInResp)
+    } else {
+      res.status(200).send(loggedInResp)
     }
-    res.status(200).send(loggedInResp)
   },
   get: (_, res) => res.status(200).send({ users: getOnlineUsers() })
 }

@@ -8,6 +8,7 @@ const {
 
 function socketController(io) {
   io.on('connection', function (socket) {
+    console.log('client connected...')
     let currentUser = {}
     socket.on(socketCmds.newUser, ({username}) => {
       currentUser = onNewUser({io, users, username})

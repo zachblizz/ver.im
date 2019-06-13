@@ -1,4 +1,4 @@
-const models = require('../models')
+// const models = require('../models')
 
 function onAddCmd(req, res) {
   // TODO: write this method...
