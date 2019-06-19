@@ -13,6 +13,6 @@ app.use(cors())
 app.use('/api', routes)
 socketController(io)
 
-http.listen(3000, function() {
-	console.log('listening on port 3000')
+http.listen(process.env.PORT || 8080, function() {
+	console.log('listening on port 8080')
 })
