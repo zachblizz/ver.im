@@ -1,0 +1,71 @@
+{
+  "/happy": {
+    "src": "pics/awesome4.png",
+    "type": "img"
+  },
+  "/sad": {
+    "src": "pics/awesome2.png",
+    "type": "img"
+  },
+  "/rly": {
+    "src": "pics/awesome5.png",
+    "type": "img"
+  },
+  "/doubt": {
+    "src": "pics/awesome.png",
+    "type": "img"
+  },
+  "/hmm": {
+    "src": "pics/hmm.gif",
+    "type": "img"
+  },
+  "/eat": {
+    "src": "pics/happyPoo.gif",
+    "type": "img"
+  },
+  "/sam": {
+    "src": "pics/sam.jpg",
+    "type": "img"
+  },
+  "/magic": {
+    "src": "pics/MAGIC.gif",
+    "type": "img"
+  },
+  "/peaceout": {
+    "src": "pics/minion_bye.gif",
+    "type": "img"
+  },
+  "/getfat": {
+    "src": "pics/fat_man.gif",
+    "type": "img"
+  },
+  "/sleepy": {
+    "src": "pics/sleepyAsian.gif",
+    "type": "img"
+  },
+  "/b": {
+    "src": "pics/thumbsUp-1.gif",
+    "type": "img"
+  },
+  "/crybabby": {
+    "src": "pics/cry.gif",
+    "type": "img"
+  },
+  "/rage": {
+    "src": "pics/keyboardRage.gif",
+    "type": "img"
+  },
+  "/clear": " Clears the message board",
+  "/helloworld": {
+    "src": "<img src='http://2017.animationdingle.com/wp-content/uploads/2016/08/hello_world.gif' />",
+    "type": "html"
+  },
+  "/LOL": {
+    "src": "<img src='http://m.memegen.com/florau.jpg'/>",
+    "type": "html"
+  },
+  "/yaoLOL": {
+    "src": "<img src='http://m.memegen.com/florau.jpg'/>",
+    "type": "html"
+  }
+}
