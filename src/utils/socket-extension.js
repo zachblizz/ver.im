@@ -3,7 +3,7 @@ const { getOnlineUsers } = require('../utils/utils')
 const fs = require('fs')
 const path = require('path')
 
-function onNewUser({io, users, username} = {}) {
+function onNewUser({io, users, username, room} = {}) {
   if (!users[username]) { // user refreshed the browser
     users[username] = {
       username,
@@ -12,36 +12,57 @@ function onNewUser({io, users, username} = {}) {
   }
 
   const onlineUsers = getOnlineUsers(users)
-  io.emit(socketCmds.sendOnlineUsers, {onlineUsers})
+  if (room) {
+    io.to(room).emit(socketCmds.sendOnlineUsers, {onlineUsers})
+  } else {
+    io.emit(socketCmds.sendOnlineUsers, {onlineUsers})
+  }
   return users[username]
 }
 
-function onUserTyping({io, users, username, cmd} = {}) {
-  io.emit(cmd, {user: users[username]})
-}
-
-function onUserDisconnect({io, currentUser, users} = {}) {
-  console.log('client disconnected')
-  if (currentUser && currentUser.username) {
-    console.log(`${currentUser.username} logged out`)
-    io.emit(socketCmds.loggedOut, {msg: `${currentUser.username} logged out`})
-    delete users[currentUser.username]
-
-    const onlineUsers = getOnlineUsers(users)
-    io.emit(socketCmds.sendOnlineUsers, {onlineUsers})
+function onUserTyping({io, users, username, cmd, room} = {}) {
+  if (room) {
+    io.to(room).emit(cmd, {user: users[username]})
+  } else {
+    io.emit(cmd, {user: users[username]})
   }
 }
 
-function onReceiveClientMsg({io, socket, msg}) {
+function onUserDisconnect({io, currentUser, users, room} = {}) {
+  console.log('client disconnected')
+  if (currentUser && currentUser.username) {
+    console.log(`${currentUser.username} logged out`)
+    if (room) {
+      io.to(room).emit(socketCmds.loggedOut, {...currentUser, msg: `${currentUser.username} logged out`})
+    } else {
+      io.emit(socketCmds.loggedOut, {...currentUser, msg: `${currentUser.username} logged out`})
+    }
+    delete users[currentUser.username]
+
+    const onlineUsers = getOnlineUsers(users)
+    if (room) {
+      io.to(room).emit(socketCmds.sendOnlineUsers, {onlineUsers})
+    } else {
+      io.emit(socketCmds.sendOnlineUsers, {onlineUsers})
+    }
+  }
+}
+
+function onReceiveClientMsg({io, socket, msg, chatCmd, room} = {}) {
+  console.log({room, msg: msg})
   if (msg.msg !== '/cmds' && (!chatCmds[msg.msg] || msg.msg === '/clear')) {
     if (msg.msg !== '/clear') {
-      io.emit(socketCmds.receiveServerMsg, msg)
+      if (room) {
+        io.to(room).emit(chatCmd, msg)
+      } else {
+        io.emit(chatCmd, msg)
+      }
     } else {
-      socket.emit(socketCmds.receiveServerMsg, msg)
+      socket.to(room).emit(chatCmd, msg)
     }
   } else {
     if (msg.msg === '/cmds') {
-      socket.emit(socketCmds.receiveServerMsg, {
+      socket.to(room).emit(chatCmd, {
         ...msg,
         username: 'svr',
         msg: ['COMMANDS:', ...Object.keys(chatCmds)],
@@ -52,23 +73,38 @@ function onReceiveClientMsg({io, socket, msg}) {
 
       if (mimeMsg.type === 'img') {
         fs.readFile(path.join(__dirname, '..', mimeMsg.src), (err, buffer) => {
-          if (err) {
-            io.emit(socketCmds.receiveServerMsg, {
-              ...msg,
-              username: 'svr',
-              msg: "doh..."
-            })
+          const payload = {
+            ...msg,
+            username: 'svr',
+            msg: "doh..."
           }
-          io.emit(socketCmds.receiveServerMsg, {...msg, image: true, buffer})
+
+          if (err) {
+            if (room) {
+              io.to(room).emit(chatCmd, payload)
+            } else {
+              io.emit(chatCmd, payload)
+            }
+          }
+          if (room) {
+            io.to(room).emit(chatCmd, {...msg, image: true, buffer})
+          } else {
+            io.emit(chatCmd, {...msg, image: true, buffer})
+          }
         })
       } else {
-        // need to send the cmd
-        io.emit(socketCmds.receiveServerMsg, {
+        const payload = {
           ...msg,
           username: 'svr',
           msg: mimeMsg.src,
           type: mimeMsg.type
-        })
+        }
+        // need to send the cmd
+        if (room) {
+          io.to(room).emit(chatCmd, payload)
+        } else {
+          io.emit(chatCmd, payload)
+        }
       }
     }
   }
