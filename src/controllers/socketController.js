@@ -27,23 +27,12 @@ function socketController(io) {
     socket.on(socketCmds.leaveRoom, ({room}) => socket.leave(`/${room}`))
     socket.on(socketCmds.startPrivateChat, data => {
       console.log(`${currentUser.username} joining room ${data.room}`)
-      const room = `/${data.room}`
+      const room = `${data.room}`
       socket.join(room)
 
       if (data.requester) {
         io.emit(socketCmds.askToJoin, data)
       }
-
-      socket.to(room).on(socketCmds.chatReceiveClientMsg, ({ room, msg }) => {
-        console.log('in the room receieve...', room)
-        onReceiveClientMsg({io, socket, msg, room, chatCmd: socketCmds.chatReceiveServerMsg})
-      })
-      socket.to(room).on(socketCmds.typing, ({username}) => 
-        onUserTyping({io, users, username, cmd: socketCmds.typing})
-      )
-      socket.to(room).on(socketCmds.doneTyping, ({username}) => 
-        onUserTyping({io, users, username, cmd: socketCmds.doneTyping})
-      )
     })
   })
 }

@@ -48,21 +48,21 @@ function onUserDisconnect({io, currentUser, users, room} = {}) {
   }
 }
 
-function onReceiveClientMsg({io, socket, msg, chatCmd, room} = {}) {
-  console.log({room, msg: msg})
+function onReceiveClientMsg({io, socket, msg, chatCmd} = {}) {
+  console.log(msg)
   if (msg.msg !== '/cmds' && (!chatCmds[msg.msg] || msg.msg === '/clear')) {
     if (msg.msg !== '/clear') {
-      if (room) {
-        io.to(room).emit(chatCmd, msg)
+      if (msg.room) {
+        socket.to(msg.room).emit(chatCmd, msg)
       } else {
         io.emit(chatCmd, msg)
       }
     } else {
-      socket.to(room).emit(chatCmd, msg)
+      socket.to(msg.room).emit(chatCmd, msg)
     }
   } else {
     if (msg.msg === '/cmds') {
-      socket.to(room).emit(chatCmd, {
+      socket.to(msg.room).emit(chatCmd, {
         ...msg,
         username: 'svr',
         msg: ['COMMANDS:', ...Object.keys(chatCmds)],
@@ -80,14 +80,14 @@ function onReceiveClientMsg({io, socket, msg, chatCmd, room} = {}) {
           }
 
           if (err) {
-            if (room) {
-              io.to(room).emit(chatCmd, payload)
+            if (msg.room) {
+              socket.to(msg.room).emit(chatCmd, payload)
             } else {
               io.emit(chatCmd, payload)
             }
           }
-          if (room) {
-            io.to(room).emit(chatCmd, {...msg, image: true, buffer})
+          if (msg.room) {
+            socket.to(msg.room).emit(chatCmd, {...msg, image: true, buffer})
           } else {
             io.emit(chatCmd, {...msg, image: true, buffer})
           }
@@ -100,8 +100,8 @@ function onReceiveClientMsg({io, socket, msg, chatCmd, room} = {}) {
           type: mimeMsg.type
         }
         // need to send the cmd
-        if (room) {
-          io.to(room).emit(chatCmd, payload)
+        if (msg.room) {
+          socket.to(msg.room).emit(chatCmd, payload)
         } else {
           io.emit(chatCmd, payload)
         }
