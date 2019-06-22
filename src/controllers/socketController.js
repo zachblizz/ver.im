@@ -4,7 +4,7 @@ const {
 	onUserDisconnect,
 	onUserTyping,
 	onReceiveClientMsg
-} = require('../utils/socket-extension')
+} = require('../utils/socket-extension') // might want to make this a factory?
 
 function socketController(io) {
   io.on('connection', function (socket) {

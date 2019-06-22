@@ -58,11 +58,11 @@ function onReceiveClientMsg({io, socket, msg, chatCmd} = {}) {
         io.emit(chatCmd, msg)
       }
     } else {
-      socket.to(msg.room).emit(chatCmd, msg)
+      socket.emit(chatCmd, msg)
     }
   } else {
     if (msg.msg === '/cmds') {
-      socket.to(msg.room).emit(chatCmd, {
+      socket.emit(chatCmd, {
         ...msg,
         username: 'svr',
         msg: ['COMMANDS:', ...Object.keys(chatCmds)],
@@ -99,7 +99,7 @@ function onReceiveClientMsg({io, socket, msg, chatCmd} = {}) {
           msg: mimeMsg.src,
           type: mimeMsg.type
         }
-        // need to send the cmd
+
         if (msg.room) {
           socket.to(msg.room).emit(chatCmd, payload)
         } else {
