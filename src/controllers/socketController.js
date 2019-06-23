@@ -13,7 +13,7 @@ function socketController(io) {
       currentUser = onNewUser({io, users, username})
     })
     socket.on(socketCmds.receiveClientMsg, msg => {
-      const emitter = msg.room && msg.room !== '/' ? socket.to(msg.room) : io
+      const emitter = msg.room.room && msg.room.room !== '/' ? socket.to(msg.room.room) : io
       onReceiveClientMsg({emitter, socket, msg})
     })
     socket.on(socketCmds.typing, ({username}) => 
@@ -27,8 +27,8 @@ function socketController(io) {
     // Private room stuff...
     socket.on(socketCmds.leaveRoom, ({room}) => socket.leave(room))
     socket.on(socketCmds.startPrivateChat, data => {
-      console.log(`${currentUser.username} joining room ${data.room.room}`)
-      const room = `${data.room.room}`
+      console.log(`${currentUser.username} joining room ${data.room}`)
+      const room = `${data.room}`
       socket.join(room)
 
       if (data.requester) {
