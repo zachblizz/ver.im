@@ -12,9 +12,10 @@ function socketController(io) {
     socket.on(socketCmds.newUser, ({username}) => {
       currentUser = onNewUser({io, users, username})
     })
-    socket.on(socketCmds.receiveClientMsg, msg => 
-      onReceiveClientMsg({io, socket, msg, chatCmd: socketCmds.receiveServerMsg})
-    )
+    socket.on(socketCmds.receiveClientMsg, msg => {
+      const emitter = msg.room && msg.room !== '/' ? socket.to(msg.room) : io
+      onReceiveClientMsg({emitter, socket, msg})
+    })
     socket.on(socketCmds.typing, ({username}) => 
       onUserTyping({io, users, username, cmd: socketCmds.typing})
     )
@@ -24,10 +25,10 @@ function socketController(io) {
     socket.on('disconnect', () => onUserDisconnect({io, currentUser, users}))
 
     // Private room stuff...
-    socket.on(socketCmds.leaveRoom, ({room}) => socket.leave(`/${room}`))
+    socket.on(socketCmds.leaveRoom, ({room}) => socket.leave(room))
     socket.on(socketCmds.startPrivateChat, data => {
-      console.log(`${currentUser.username} joining room ${data.room}`)
-      const room = `${data.room}`
+      console.log(`${currentUser.username} joining room ${data.room.room}`)
+      const room = `${data.room.room}`
       socket.join(room)
 
       if (data.requester) {

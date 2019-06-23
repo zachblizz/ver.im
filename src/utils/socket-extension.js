@@ -48,21 +48,18 @@ function onUserDisconnect({io, currentUser, users, room} = {}) {
   }
 }
 
-function onReceiveClientMsg({io, socket, msg, chatCmd} = {}) {
+// send the object to emit
+function onReceiveClientMsg({emitter, socket, msg} = {}) {
   console.log(msg)
   if (msg.msg !== '/cmds' && (!chatCmds[msg.msg] || msg.msg === '/clear')) {
     if (msg.msg !== '/clear') {
-      if (msg.room) {
-        socket.to(msg.room).emit(chatCmd, msg)
-      } else {
-        io.emit(chatCmd, msg)
-      }
+      emitter.emit(socketCmds.receiveServerMsg, msg)
     } else {
-      socket.emit(chatCmd, msg)
+      socket.emit(socketCmds.receiveServerMsg, msg)
     }
   } else {
     if (msg.msg === '/cmds') {
-      socket.emit(chatCmd, {
+      socket.emit(socketCmds.receiveServerMsg, {
         ...msg,
         username: 'svr',
         msg: ['COMMANDS:', ...Object.keys(chatCmds)],
@@ -73,38 +70,22 @@ function onReceiveClientMsg({io, socket, msg, chatCmd} = {}) {
 
       if (mimeMsg.type === 'img') {
         fs.readFile(path.join(__dirname, '..', mimeMsg.src), (err, buffer) => {
-          const payload = {
-            ...msg,
-            username: 'svr',
-            msg: "doh..."
-          }
-
           if (err) {
-            if (msg.room) {
-              socket.to(msg.room).emit(chatCmd, payload)
-            } else {
-              io.emit(chatCmd, payload)
-            }
+            emitter.emit(socketCmds.receiveServerMsg, {
+              ...msg,
+              username: 'svr',
+              msg: "doh..."
+            })
           }
-          if (msg.room) {
-            socket.to(msg.room).emit(chatCmd, {...msg, image: true, buffer})
-          } else {
-            io.emit(chatCmd, {...msg, image: true, buffer})
-          }
+          emitter.emit(socketCmds.receiveServerMsg, {...msg, image: true, buffer})
         })
       } else {
-        const payload = {
+        emitter.emit(socketCmds.receiveServerMsg, {
           ...msg,
           username: 'svr',
           msg: mimeMsg.src,
           type: mimeMsg.type
-        }
-
-        if (msg.room) {
-          socket.to(msg.room).emit(chatCmd, payload)
-        } else {
-          io.emit(chatCmd, payload)
-        }
+        })
       }
     }
   }
