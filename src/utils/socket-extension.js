@@ -50,10 +50,13 @@ function onUserDisconnect({io, currentUser, users, room} = {}) {
 
 // send the object to emit
 function onReceiveClientMsg({emitter, socket, msg} = {}) {
-  console.log(msg)
+  const shouldSendToSelf = msg.room.room !== '/'
+
   if (msg.msg !== '/cmds' && (!chatCmds[msg.msg] || msg.msg === '/clear')) {
     if (msg.msg !== '/clear') {
       emitter.emit(socketCmds.receiveServerMsg, msg)
+      if (shouldSendToSelf)
+        socket.emit(socketCmds.receiveServerMsg, msg)
     } else {
       socket.emit(socketCmds.receiveServerMsg, msg)
     }
@@ -71,13 +74,16 @@ function onReceiveClientMsg({emitter, socket, msg} = {}) {
       if (mimeMsg.type === 'img') {
         fs.readFile(path.join(__dirname, '..', mimeMsg.src), (err, buffer) => {
           if (err) {
-            emitter.emit(socketCmds.receiveServerMsg, {
+            socket.emit(socketCmds.receiveServerMsg, {
               ...msg,
               username: 'svr',
               msg: "doh..."
             })
           }
           emitter.emit(socketCmds.receiveServerMsg, {...msg, image: true, buffer})
+          if (shouldSendToSelf) {
+            socket.emit(socketCmds.receiveServerMsg, {...msg, image: true, buffer})
+          }
         })
       } else {
         emitter.emit(socketCmds.receiveServerMsg, {
@@ -86,6 +92,15 @@ function onReceiveClientMsg({emitter, socket, msg} = {}) {
           msg: mimeMsg.src,
           type: mimeMsg.type
         })
+
+        if (shouldSendToSelf) {
+          socket.emit(socketCmds.receiveServerMsg, {
+            ...msg,
+            username: 'svr',
+            msg: mimeMsg.src,
+            type: mimeMsg.type
+          })
+        }
       }
     }
   }
