@@ -1,6 +1,6 @@
-const usersController = require('./usersController')
-const chatCmdsController = require('./chatCmdsController')
-const socketController = require('./socketController')
+const usersController = require('./users-controller')
+const chatCmdsController = require('./chat-cmds-controller')
+const socketController = require('./socket-controller')
 
 module.exports = {
   usersController,

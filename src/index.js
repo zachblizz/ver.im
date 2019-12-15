@@ -5,7 +5,7 @@ const	http = require('http').Server(app)
 const	io = require('socket.io')(http)
 const	bodyparser = require('body-parser')
 const routes = require('./routes')
-const { socketController } = require('./controllers/socketController')
+const { socketController } = require('./controllers/socket-controller')
 
 // app.use(express.static(path.join(__dirname, 'pics')))
 app.use(bodyparser.json())

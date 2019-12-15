@@ -35,7 +35,7 @@ const usersController = {
     const username = req.body.username
     const loggedInResp = onLogin(username)
     if (!loggedInResp.userAdded) {
-      res.status(500).send(loggedInResp)
+      res.status(400).send(loggedInResp)
     } else {
       res.status(200).send(loggedInResp)
     }

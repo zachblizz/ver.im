@@ -1,9 +1,11 @@
-const routes = require('express')()
+const express = require('express')
+const router = new express.Router()
 const { usersController, chatCmdsController, socketController } = require('./controllers')
 
-routes.put('/login', usersController.login)
-routes.get('/onlineUsers', usersController.get)
-routes.put('/addCmd', chatCmdsController.put)
-routes.get('/socketCmds', socketController.get)
+router.put('/login', usersController.login)
+router.get('/onlineUsers', usersController.get)
 
-module.exports = routes
+router.put('/addCmd', chatCmdsController.put)
+router.get('/socketCmds', socketController.get)
+
+module.exports = router
